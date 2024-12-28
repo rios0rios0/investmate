@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,7 +16,9 @@ import (
 )
 
 const (
-	YearsToFetch = 5 // Number of years to fetch data for
+	YearsToFetch         = 5 // Number of years to fetch data for
+	PercentageMultiplier = 100
+	NumberOfDaysInYear   = 365
 )
 
 // ETF represents an ETF and its dividend cash amounts by year
@@ -30,8 +33,8 @@ type ETF struct {
 func (e *ETF) ShowDividendsPerYear(startYear, totalYears int) []string {
 	formatted := make([]string, totalYears)
 
-	for i := 0; i < totalYears; i++ {
-		year := fmt.Sprintf("%d", startYear-i)
+	for i := range make([]struct{}, totalYears) {
+		year := strconv.Itoa(startYear - i)
 		if value, exists := e.AmountDividendsPerYear[year]; exists {
 			formatted[i] = fmt.Sprintf("$%.2f", value)
 		} else {
@@ -49,8 +52,8 @@ func (e *ETF) AverageDividends(startYear, totalYears int) float64 {
 
 	var sum float64
 	var count int
-	for i := 0; i < totalYears; i++ {
-		year := fmt.Sprintf("%d", startYear-i)
+	for i := range make([]struct{}, totalYears) {
+		year := strconv.Itoa(startYear - i)
 		if value, exists := e.AmountDividendsPerYear[year]; exists {
 			sum += value
 			count++
@@ -67,8 +70,8 @@ func (e *ETF) AverageDividends(startYear, totalYears int) float64 {
 func (e *ETF) ShowClosingPricesPerYear(startYear, totalYears int) []string {
 	formatted := make([]string, totalYears)
 
-	for i := 0; i < totalYears; i++ {
-		year := fmt.Sprintf("%d", startYear-i)
+	for i := range make([]struct{}, totalYears) {
+		year := strconv.Itoa(startYear - i)
 		if value, exists := e.AverageClosingPricePerYear[year]; exists {
 			formatted[i] = fmt.Sprintf("$%.2f", value)
 		} else {
@@ -86,8 +89,8 @@ func (e *ETF) AverageClosingPrices(startYear, totalYears int) float64 {
 
 	var sum float64
 	var count int
-	for i := 0; i < totalYears; i++ {
-		year := fmt.Sprintf("%d", startYear-i)
+	for i := range make([]struct{}, totalYears) {
+		year := strconv.Itoa(startYear - i)
 		if value, exists := e.AverageClosingPricePerYear[year]; exists {
 			sum += value
 			count++
@@ -105,11 +108,11 @@ func (e *ETF) ShowDividendYieldPerYear(startYear, totalYears int) []string {
 	formatted := make([]string, totalYears)
 	e.DividendYieldPerYear = make(map[string]float64)
 
-	for i := 0; i < totalYears; i++ {
-		year := fmt.Sprintf("%d", startYear-i)
-		if dividend, exists := e.AmountDividendsPerYear[year]; exists {
-			if closingPrice, exists := e.AverageClosingPricePerYear[year]; exists && closingPrice != 0 {
-				yield := (dividend / closingPrice) * 100
+	for i := range make([]struct{}, totalYears) {
+		year := strconv.Itoa(startYear - i)
+		if dividend, dividendExists := e.AmountDividendsPerYear[year]; dividendExists {
+			if closingPrice, priceExists := e.AverageClosingPricePerYear[year]; priceExists && closingPrice != 0 {
+				yield := (dividend / closingPrice) * PercentageMultiplier
 				e.DividendYieldPerYear[year] = yield
 				formatted[i] = fmt.Sprintf("%.2f%%", yield)
 			} else {
@@ -131,8 +134,8 @@ func (e *ETF) AverageDividendYield(startYear int, totalYears int) float64 {
 
 	var sum float64
 	var count int
-	for i := 0; i < totalYears; i++ {
-		year := fmt.Sprintf("%d", startYear-i)
+	for i := range make([]struct{}, totalYears) {
+		year := strconv.Itoa(startYear - i)
 		if yield, exists := e.DividendYieldPerYear[year]; exists {
 			sum += yield
 			count++
@@ -189,9 +192,8 @@ func crawlingDividendsPerYear(etf string) (map[string]float64, error) {
 	})
 
 	url := fmt.Sprintf("https://dividendhistory.org/payout/%s/", etf)
-	err := c.Visit(url)
-	if err != nil {
-		return nil, err
+	if err := c.Visit(url); err != nil {
+		return nil, fmt.Errorf("failed to visit URL: %w", err)
 	}
 
 	return yearlyTotals, nil
@@ -204,13 +206,20 @@ func fetchAverageClosingPricesPerYear(etf string) (map[string]float64, error) {
 	fromDate := fmt.Sprintf("%d-01-01", currentYear-YearsToFetch)
 	toDate := fmt.Sprintf("%d-12-31", currentYear)
 
-	url := fmt.Sprintf("https://api.nasdaq.com/api/quote/%s/historical?assetclass=etf&fromdate=%s&todate=%s&limit=%d&offset=0", etf, fromDate, toDate, YearsToFetch*365)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+	url := fmt.Sprintf(
+		"https://api.nasdaq.com/api/quote/%s/historical?assetclass=etf&fromdate=%s&todate=%s&limit=%d&offset=0",
+		etf, fromDate, toDate, YearsToFetch*NumberOfDaysInYear,
+	)
+	ctx := context.Background()
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req.Header.Set(
+		"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "+
+			"(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+	)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch data: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -225,16 +234,16 @@ func fetchAverageClosingPricesPerYear(etf string) (map[string]float64, error) {
 		} `json:"data"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
+	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	yearlySums := make(map[string]float64)
 	yearlyCounts := make(map[string]int)
 
 	for _, row := range result.Data.TradesTable.Rows {
-		closePrice, err := strconv.ParseFloat(strings.ReplaceAll(row.Close, "$", ""), 64)
-		if err == nil {
+		closePrice, parseErr := strconv.ParseFloat(strings.ReplaceAll(row.Close, "$", ""), 64)
+		if parseErr == nil {
 			year := strings.Split(row.Date, "/")[2]
 			yearlySums[year] += closePrice
 			yearlyCounts[year]++
@@ -281,8 +290,8 @@ func main() {
 	totalYears := YearsToFetch
 	currentYear := time.Now().Year()
 	headers := []string{"ETF"}
-	for i := 0; i < totalYears; i++ {
-		headers = append(headers, fmt.Sprintf("%d", currentYear-i))
+	for i := range make([]struct{}, totalYears) {
+		headers = append(headers, strconv.Itoa(currentYear-i))
 	}
 	headers = append(headers, "Averages")
 	table.SetHeader(headers)
