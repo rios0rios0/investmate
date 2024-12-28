@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -12,31 +14,25 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	YearsToFetch = 5 // Number of years to fetch data for
+)
+
 // ETF represents an ETF and its dividend cash amounts by year
 type ETF struct {
-	Name          string
-	DividendYears map[string]float64 // Key: Year, Value: Total Dividend Cash
+	Name                       string
+	AmountDividendsPerYear     map[string]float64 // Key: Year, Value: Total Dividend Cash
+	AverageClosingPricePerYear map[string]float64 // Key: Year, Value: Average Closing Price
+	DividendYieldPerYear       map[string]float64 // Key: Year, Value: Dividend Yield Percentage
 }
 
-// CalculateAverage calculates the average of the available dividend cash amounts
-func (e *ETF) CalculateAverage() float64 {
-	if len(e.DividendYears) == 0 {
-		return 0
-	}
-	var sum float64
-	for _, value := range e.DividendYears {
-		sum += value
-	}
-	return sum / float64(len(e.DividendYears))
-}
-
-// DisplayYearlySums formats the yearly sums for table display
-func (e *ETF) DisplayYearlySums(totalYears int, startYear int) []string {
+// ShowDividendsPerYear formats the yearly sums for table display
+func (e *ETF) ShowDividendsPerYear(startYear, totalYears int) []string {
 	formatted := make([]string, totalYears)
 
 	for i := 0; i < totalYears; i++ {
 		year := fmt.Sprintf("%d", startYear-i)
-		if value, exists := e.DividendYears[year]; exists {
+		if value, exists := e.AmountDividendsPerYear[year]; exists {
 			formatted[i] = fmt.Sprintf("$%.2f", value)
 		} else {
 			formatted[i] = "-"
@@ -45,24 +41,135 @@ func (e *ETF) DisplayYearlySums(totalYears int, startYear int) []string {
 	return formatted
 }
 
-// ScrapeETFs populates an array of ETFs with dividend cash data
-func ScrapeETFs(etfNames []string) ([]*ETF, error) {
-	var etfs []*ETF
-	for _, name := range etfNames {
-		etf := &ETF{Name: name, DividendYears: make(map[string]float64)}
-		dividends, err := scrapeDividendCash(name)
-		if err != nil {
-			logrus.WithError(err).Errorf("Failed to scrape data for ETF: %s", name)
-			continue
-		}
-		etf.DividendYears = dividends
-		etfs = append(etfs, etf)
+// AverageDividends calculates the average of the available dividend cash amounts for the specified years
+func (e *ETF) AverageDividends(startYear, totalYears int) float64 {
+	if len(e.AmountDividendsPerYear) == 0 {
+		return 0
 	}
-	return etfs, nil
+
+	var sum float64
+	var count int
+	for i := 0; i < totalYears; i++ {
+		year := fmt.Sprintf("%d", startYear-i)
+		if value, exists := e.AmountDividendsPerYear[year]; exists {
+			sum += value
+			count++
+		}
+	}
+	if count == 0 {
+		return 0
+	}
+
+	return sum / float64(count)
 }
 
-// scrapeDividendCash scrapes the total annual dividend cash amounts for the given ETF
-func scrapeDividendCash(etf string) (map[string]float64, error) {
+// ShowClosingPricesPerYear formats the average closing prices for table display
+func (e *ETF) ShowClosingPricesPerYear(startYear, totalYears int) []string {
+	formatted := make([]string, totalYears)
+
+	for i := 0; i < totalYears; i++ {
+		year := fmt.Sprintf("%d", startYear-i)
+		if value, exists := e.AverageClosingPricePerYear[year]; exists {
+			formatted[i] = fmt.Sprintf("$%.2f", value)
+		} else {
+			formatted[i] = "-"
+		}
+	}
+	return formatted
+}
+
+// AverageClosingPrices calculates the average closing prices for the specified years
+func (e *ETF) AverageClosingPrices(startYear, totalYears int) float64 {
+	if len(e.AverageClosingPricePerYear) == 0 {
+		return 0
+	}
+
+	var sum float64
+	var count int
+	for i := 0; i < totalYears; i++ {
+		year := fmt.Sprintf("%d", startYear-i)
+		if value, exists := e.AverageClosingPricePerYear[year]; exists {
+			sum += value
+			count++
+		}
+	}
+	if count == 0 {
+		return 0
+	}
+
+	return sum / float64(count)
+}
+
+// ShowDividendYieldPerYear calculates the dividend yield for each year and stores it in the ETF struct
+func (e *ETF) ShowDividendYieldPerYear(startYear, totalYears int) []string {
+	formatted := make([]string, totalYears)
+	e.DividendYieldPerYear = make(map[string]float64)
+
+	for i := 0; i < totalYears; i++ {
+		year := fmt.Sprintf("%d", startYear-i)
+		if dividend, exists := e.AmountDividendsPerYear[year]; exists {
+			if closingPrice, exists := e.AverageClosingPricePerYear[year]; exists && closingPrice != 0 {
+				yield := (dividend / closingPrice) * 100
+				e.DividendYieldPerYear[year] = yield
+				formatted[i] = fmt.Sprintf("%.2f%%", yield)
+			} else {
+				formatted[i] = "-"
+			}
+		} else {
+			formatted[i] = "-"
+		}
+	}
+
+	return formatted
+}
+
+// AverageDividendYield calculates the average dividend yield for the specified years
+func (e *ETF) AverageDividendYield(startYear int, totalYears int) float64 {
+	if len(e.DividendYieldPerYear) == 0 {
+		return 0
+	}
+
+	var sum float64
+	var count int
+	for i := 0; i < totalYears; i++ {
+		year := fmt.Sprintf("%d", startYear-i)
+		if yield, exists := e.DividendYieldPerYear[year]; exists {
+			sum += yield
+			count++
+		}
+	}
+	if count == 0 {
+		return 0
+	}
+
+	return sum / float64(count)
+}
+
+// processETF populates an array of ETFs with dividend cash data and average closing prices
+func processETF(name string) *ETF {
+	etf := &ETF{
+		Name:                       name,
+		AmountDividendsPerYear:     make(map[string]float64),
+		AverageClosingPricePerYear: make(map[string]float64),
+	}
+
+	dividendsPerYear, err := crawlingDividendsPerYear(name)
+	if err != nil {
+		logrus.WithError(err).Errorf("Failed to scrape data for ETF: %s", name)
+	}
+	etf.AmountDividendsPerYear = dividendsPerYear
+
+	closingPricesPerYear, err := fetchAverageClosingPricesPerYear(name)
+	if err != nil {
+		logrus.WithError(err).Errorf("Failed to fetch average close prices for ETF: %s", name)
+	}
+	etf.AverageClosingPricePerYear = closingPricesPerYear
+
+	return etf
+}
+
+// crawlingDividendsPerYear scrapes the total annual dividend cash amounts for the given ETF
+func crawlingDividendsPerYear(etf string) (map[string]float64, error) {
 	c := colly.NewCollector()
 
 	yearlyTotals := make(map[string]float64)
@@ -90,30 +197,98 @@ func scrapeDividendCash(etf string) (map[string]float64, error) {
 	return yearlyTotals, nil
 }
 
+// fetchAverageClosingPricesPerYear fetches the average closing prices per year for the given ETF
+func fetchAverageClosingPricesPerYear(etf string) (map[string]float64, error) {
+	averageClosePrices := make(map[string]float64)
+	currentYear := time.Now().Year()
+	fromDate := fmt.Sprintf("%d-01-01", currentYear-YearsToFetch)
+	toDate := fmt.Sprintf("%d-12-31", currentYear)
+
+	url := fmt.Sprintf("https://api.nasdaq.com/api/quote/%s/historical?assetclass=etf&fromdate=%s&todate=%s&limit=%d&offset=0", etf, fromDate, toDate, YearsToFetch*365)
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Data struct {
+			TradesTable struct {
+				Rows []struct {
+					Close string `json:"close"`
+					Date  string `json:"date"`
+				} `json:"rows"`
+			} `json:"tradesTable"`
+		} `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	yearlySums := make(map[string]float64)
+	yearlyCounts := make(map[string]int)
+
+	for _, row := range result.Data.TradesTable.Rows {
+		closePrice, err := strconv.ParseFloat(strings.ReplaceAll(row.Close, "$", ""), 64)
+		if err == nil {
+			year := strings.Split(row.Date, "/")[2]
+			yearlySums[year] += closePrice
+			yearlyCounts[year]++
+		}
+	}
+
+	for year, sum := range yearlySums {
+		if count, exists := yearlyCounts[year]; exists && count > 0 {
+			averageClosePrices[year] = sum / float64(count)
+		}
+	}
+
+	return averageClosePrices, nil
+}
+
 func main() {
 	logrus.Info("Starting ETF data scraping...")
 
-	etfNames := []string{"HYGW", "RIET", "SDIV", "SVOL", "XYLD"}
-	etfs, err := ScrapeETFs(etfNames)
-	if err != nil {
-		logrus.WithError(err).Fatal("Failed to scrape ETFs")
+	var etfs []*ETF
+	etfNames := []string{"SPY"}
+
+	for _, name := range etfNames {
+		etf := processETF(name)
+		etfs = append(etfs, etf)
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	totalYears := 5
+	totalYears := YearsToFetch
 	currentYear := time.Now().Year()
 	headers := []string{"ETF"}
 	for i := 0; i < totalYears; i++ {
 		headers = append(headers, fmt.Sprintf("%d", currentYear-i))
 	}
-	headers = append(headers, "Average")
+	headers = append(headers, "Averages")
 	table.SetHeader(headers)
 
 	for _, etf := range etfs {
-		row := []string{etf.Name}
-		row = append(row, etf.DisplayYearlySums(totalYears, currentYear)...)
-		row = append(row, fmt.Sprintf("$%.2f", etf.CalculateAverage()))
-		table.Append(row)
+		// dividend sums
+		dividendRow := []string{etf.Name + " Dividends"}
+		dividendRow = append(dividendRow, etf.ShowDividendsPerYear(currentYear, totalYears)...)
+		dividendRow = append(dividendRow, fmt.Sprintf("$%.2f", etf.AverageDividends(currentYear, totalYears)))
+		table.Append(dividendRow)
+
+		// closing prices
+		closePriceRow := []string{etf.Name + " Closing Prices"}
+		closePriceRow = append(closePriceRow, etf.ShowClosingPricesPerYear(currentYear, totalYears)...)
+		closePriceRow = append(closePriceRow, fmt.Sprintf("$%.2f", etf.AverageClosingPrices(currentYear, totalYears)))
+		table.Append(closePriceRow)
+
+		// dividend yield
+		dividendYieldRow := []string{etf.Name + " Dividend Yield"}
+		dividendYieldRow = append(dividendYieldRow, etf.ShowDividendYieldPerYear(currentYear, totalYears)...)
+		dividendYieldRow = append(dividendYieldRow, fmt.Sprintf("%.2f%%", etf.AverageDividendYield(currentYear, totalYears)))
+		table.Append(dividendYieldRow)
 	}
 
 	logrus.Info("Rendering the results...")
