@@ -250,11 +250,27 @@ func fetchAverageClosingPricesPerYear(etf string) (map[string]float64, error) {
 	return averageClosePrices, nil
 }
 
+// getColors returns the colors for the dividend yield row
+func getColors(row []string) []tablewriter.Colors {
+	colors := make([]tablewriter.Colors, len(row))
+	for i, cell := range row {
+		if strings.HasSuffix(cell, "%") {
+			value, err := strconv.ParseFloat(strings.TrimSuffix(cell, "%"), 64)
+			if err == nil && value >= 9 {
+				colors[i] = tablewriter.Colors{tablewriter.FgGreenColor}
+			} else if err == nil && value < 9 {
+				colors[i] = tablewriter.Colors{tablewriter.FgRedColor}
+			}
+		}
+	}
+	return colors
+}
+
 func main() {
 	logrus.Info("Starting ETF data scraping...")
 
 	var etfs []*ETF
-	etfNames := []string{"SPY"}
+	etfNames := []string{"HYGW", "RIET", "SDIV", "SVOL", "XYLD"}
 
 	for _, name := range etfNames {
 		etf := processETF(name)
@@ -272,23 +288,26 @@ func main() {
 	table.SetHeader(headers)
 
 	for _, etf := range etfs {
-		// dividend sums
+		// Dividend sums
 		dividendRow := []string{etf.Name + " Dividends"}
 		dividendRow = append(dividendRow, etf.ShowDividendsPerYear(currentYear, totalYears)...)
 		dividendRow = append(dividendRow, fmt.Sprintf("$%.2f", etf.AverageDividends(currentYear, totalYears)))
 		table.Append(dividendRow)
 
-		// closing prices
+		// Closing prices
 		closePriceRow := []string{etf.Name + " Closing Prices"}
 		closePriceRow = append(closePriceRow, etf.ShowClosingPricesPerYear(currentYear, totalYears)...)
 		closePriceRow = append(closePriceRow, fmt.Sprintf("$%.2f", etf.AverageClosingPrices(currentYear, totalYears)))
 		table.Append(closePriceRow)
 
-		// dividend yield
-		dividendYieldRow := []string{etf.Name + " Dividend Yield"}
+		// Dividend yields
+		dividendYieldRow := []string{etf.Name + " Dividend Yields"}
 		dividendYieldRow = append(dividendYieldRow, etf.ShowDividendYieldPerYear(currentYear, totalYears)...)
 		dividendYieldRow = append(dividendYieldRow, fmt.Sprintf("%.2f%%", etf.AverageDividendYield(currentYear, totalYears)))
-		table.Append(dividendYieldRow)
+		table.Rich(dividendYieldRow, getColors(dividendYieldRow))
+
+		// Add a separator row after every 3 lines
+		table.Append([]string{"-", "-", "-", "-", "-", "-", "-"})
 	}
 
 	logrus.Info("Rendering the results...")
