@@ -22,3 +22,7 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 - added the feature to fetch the `https://api.nasdaq.com/api/quote/{ticker}` endpoint to get the price history of an ETF
 - added the feature to calculate the dividend yield of an ETF on the last X years
 - added table colors to make it easier to read the data (green for target values, red for opposite)
+
+### Changed
+
+- corrected the structure to respect the community standards
