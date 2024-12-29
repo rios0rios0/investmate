@@ -78,7 +78,9 @@ func main() {
 	for i := range make([]struct{}, totalYears) {
 		headers = append(headers, strconv.Itoa(currentYear-i))
 	}
-	headers = append(headers, "Averages")
+	headers = append(headers, "Averages", // Calculated fields
+		"Payout Frequency", "Average Volume", "Expense Ratio", "Beta", "AUM", "Inception Date", // Metric fields
+	)
 	table.SetHeader(headers)
 
 	for _, etf := range etfs {
