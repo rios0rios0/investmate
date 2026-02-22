@@ -30,3 +30,4 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 - changed the structure to comply DDD standards and principles
 - changed the Go version to `1.26.0` and updated all module dependencies
 - changed the Go module dependencies to their latest versions
+- changed the Go module dependencies to their latest versions
