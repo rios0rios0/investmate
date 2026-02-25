@@ -4,6 +4,12 @@
         <img src="https://img.shields.io/github/release/rios0rios0/investmate.svg?style=for-the-badge&logo=github" alt="Latest Release"/></a>
     <a href="https://github.com/rios0rios0/investmate/blob/main/LICENSE">
         <img src="https://img.shields.io/github/license/rios0rios0/investmate.svg?style=for-the-badge&logo=github" alt="License"/></a>
+    <a href="https://github.com/rios0rios0/investmate/actions/workflows/default.yaml">
+        <img src="https://img.shields.io/github/actions/workflow/status/rios0rios0/investmate/default.yaml?branch=main&style=for-the-badge&logo=github" alt="Build Status"/></a>
+    <a href="https://sonarcloud.io/summary/overall?id=rios0rios0_investmate">
+        <img src="https://img.shields.io/sonar/coverage/rios0rios0_investmate?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge&logo=sonarqubecloud" alt="Coverage"/></a>
+    <a href="https://sonarcloud.io/summary/overall?id=rios0rios0_investmate">
+        <img src="https://img.shields.io/sonar/quality_gate/rios0rios0_investmate?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge&logo=sonarqubecloud" alt="Quality Gate"/></a>
 </p>
 
 A Go application that scrapes and processes ETF (Exchange-Traded Fund) data, including dividend cash amounts, average closing prices, and dividend yields over a specified number of years. The data is then displayed in a formatted table.
