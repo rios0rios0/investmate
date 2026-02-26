@@ -95,7 +95,7 @@ The application will scrape data for the specified ETFs and display it in a form
 
 ## Contributing
 
-Contributions are welcome. Please open an issue or submit a pull request for improvements or bug fixes.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
