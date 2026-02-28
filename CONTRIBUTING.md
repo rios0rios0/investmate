@@ -8,6 +8,7 @@ development practices, refer to the **[Development Guide](https://github.com/rio
 ## Prerequisites
 
 - [Go](https://go.dev/dl/) 1.26+
+- [Git](https://git-scm.com/) 2.0+
 
 ## Development Workflow
 
@@ -17,14 +18,22 @@ development practices, refer to the **[Development Guide](https://github.com/rio
    ```bash
    go mod download
    ```
-4. Build the binary:
+4. Run the application:
    ```bash
-   go build -o bin/investmate .
+   go run ./cmd/main.go
    ```
-5. Make your changes
+5. Build the project:
+   ```bash
+   go build -o bin/investmate ./cmd/main.go
+   ```
 6. Run tests:
    ```bash
    go test ./...
    ```
-7. Commit following the [commit conventions](https://github.com/rios0rios0/guide/wiki/Life-Cycle/Git-Flow)
-8. Open a pull request against `main`
+7. Run tests with coverage:
+   ```bash
+   go test -coverprofile=coverage.out ./...
+   go tool cover -func coverage.out
+   ```
+8. Commit following the [commit conventions](https://github.com/rios0rios0/guide/wiki/Life-Cycle/Git-Flow)
+9. Open a pull request against `main`
