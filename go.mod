@@ -1,6 +1,6 @@
 module github.com/rios0rios0/investmate
 
-go 1.26.0
+go 1.26.1
 
 require (
 	github.com/gocolly/colly v1.2.0
@@ -12,7 +12,7 @@ require (
 require (
 	github.com/PuerkitoBio/goquery v1.11.0 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
-	github.com/antchfx/htmlquery v1.3.5 // indirect
+	github.com/antchfx/htmlquery v1.3.6 // indirect
 	github.com/antchfx/xmlquery v1.5.0 // indirect
 	github.com/antchfx/xpath v1.3.6 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
