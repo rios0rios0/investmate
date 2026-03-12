@@ -9,52 +9,82 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/rios0rios0/investmate/internal/domain/entities"
+	"github.com/rios0rios0/investmate/internal/domain/repositories"
 	"github.com/rios0rios0/investmate/internal/infrastructure/repositories/nasdaq"
 	logger "github.com/sirupsen/logrus"
 )
 
 const (
-	YearsToFetch = 5 // Number of years to fetch data for
+	// YearsToFetch is the number of years to fetch data for.
+	YearsToFetch = 5
+
+	// targetYieldPercentage is the minimum dividend yield percentage considered a good target.
+	targetYieldPercentage = 9
+
+	// ansiGreen is the ANSI escape code for green foreground text.
+	ansiGreen = "\033[32m"
+
+	// ansiRed is the ANSI escape code for red foreground text.
+	ansiRed = "\033[31m"
+
+	// ansiReset is the ANSI escape code to reset text formatting.
+	ansiReset = "\033[0m"
 )
 
-// processETF populates an array of ETFs with dividend cash data and average closing prices
-func processETF(name string) *entities.ETF {
+// processETF populates an ETF struct with dividend cash data and average closing prices.
+func processETF(
+	name string,
+	dividendsRepo repositories.DividendsRepository,
+	pricesRepo repositories.PricesRepository,
+) *entities.ETF {
 	etf := &entities.ETF{
 		Name:                       name,
 		AmountDividendsPerYear:     make(map[string]float64),
 		AverageClosingPricePerYear: make(map[string]float64),
 	}
 
-	// dividendsPerYear, err := statusinvest.NewCrawlerDividendsRepository().ListDividendsByETF(name)
-	dividendsPerYear, err := nasdaq.NewAPIDividendsRepository().ListDividendsByETF(name)
+	dividendsPerYear, err := dividendsRepo.ListDividendsByETF(name)
 	if err != nil {
 		logger.WithError(err).Errorf("Failed to scrape data for ETF: %s", name)
 	}
+
 	etf.AmountDividendsPerYear = dividendsPerYear
 
-	closingPricesPerYear, err := nasdaq.NewAPIPricesRepository().ListClosingPricesByETF(name)
+	closingPricesPerYear, err := pricesRepo.ListClosingPricesByETF(name)
 	if err != nil {
 		logger.WithError(err).Errorf("Failed to fetch average close prices for ETF: %s", name)
 	}
+
 	etf.AverageClosingPricePerYear = closingPricesPerYear
 
 	return etf
 }
 
-// getColors returns the colors for the dividend yield row
-func getColors(row []string) []tablewriter.Colors {
-	colors := make([]tablewriter.Colors, len(row))
+// applyColors wraps each cell that contains a percentage value with the appropriate ANSI color code.
+// Cells with a dividend yield at or above the target threshold are colored green; below is red.
+func applyColors(row []string) []string {
+	colored := make([]string, len(row))
+
 	for i, cell := range row {
-		if strings.HasSuffix(cell, "%") {
-			value, err := strconv.ParseFloat(strings.TrimSuffix(cell, "%"), 64)
-			if err == nil && value >= 9 {
-				colors[i] = tablewriter.Colors{tablewriter.FgGreenColor}
-			} else if err == nil && value < 9 {
-				colors[i] = tablewriter.Colors{tablewriter.FgRedColor}
-			}
+		before, ok := strings.CutSuffix(cell, "%")
+		if !ok {
+			colored[i] = cell
+			continue
+		}
+
+		value, err := strconv.ParseFloat(before, 64)
+
+		switch {
+		case err == nil && value >= targetYieldPercentage:
+			colored[i] = ansiGreen + cell + ansiReset
+		case err == nil && value < targetYieldPercentage:
+			colored[i] = ansiRed + cell + ansiReset
+		default:
+			colored[i] = cell
 		}
 	}
-	return colors
+
+	return colored
 }
 
 func main() {
@@ -66,8 +96,11 @@ func main() {
 		"HYGW", "RIET", "SDIV", "SVOL", "XYLD",
 	}
 
+	dividendsRepo := nasdaq.NewAPIDividendsRepository()
+	pricesRepo := nasdaq.NewAPIPricesRepository()
+
 	for _, name := range etfNames {
-		etf := processETF(name)
+		etf := processETF(name, dividendsRepo, pricesRepo)
 		etfs = append(etfs, etf)
 	}
 
@@ -75,37 +108,57 @@ func main() {
 	totalYears := YearsToFetch
 	currentYear := time.Now().Year()
 	headers := []string{"ETF"}
-	for i := range make([]struct{}, totalYears) {
+
+	for i := range totalYears {
 		headers = append(headers, strconv.Itoa(currentYear-i))
 	}
-	headers = append(headers, "Averages", // Calculated fields
-		"Payout Frequency", "Average Volume", "Expense Ratio", "Beta", "AUM", "Inception Date", // Metric fields
+
+	headers = append(headers,
+		"Averages",
+		"Payout Frequency", "Average Volume", "Expense Ratio", "Beta", "AUM", "Inception Date",
 	)
-	table.SetHeader(headers)
+	table.Header(headers)
 
 	for _, etf := range etfs {
-		// Dividend sums
+		// Dividend sums.
 		dividendRow := []string{etf.Name + " Dividends"}
 		dividendRow = append(dividendRow, etf.ShowDividendsPerYear(currentYear, totalYears)...)
 		dividendRow = append(dividendRow, fmt.Sprintf("$%.3f", etf.AverageDividends(currentYear, totalYears)))
-		table.Append(dividendRow)
 
-		// Closing prices
+		if err := table.Append(dividendRow); err != nil {
+			logger.WithError(err).Errorf("Failed to append dividend row for ETF: %s", etf.Name)
+		}
+
+		// Closing prices.
 		closePriceRow := []string{etf.Name + " Closing Prices"}
 		closePriceRow = append(closePriceRow, etf.ShowClosingPricesPerYear(currentYear, totalYears)...)
 		closePriceRow = append(closePriceRow, fmt.Sprintf("$%.3f", etf.AverageClosingPrices(currentYear, totalYears)))
-		table.Append(closePriceRow)
 
-		// Dividend yields
+		if err := table.Append(closePriceRow); err != nil {
+			logger.WithError(err).Errorf("Failed to append close price row for ETF: %s", etf.Name)
+		}
+
+		// Dividend yields with color-coded cells based on the target yield threshold.
 		dividendYieldRow := []string{etf.Name + " Dividend Yields"}
 		dividendYieldRow = append(dividendYieldRow, etf.ShowDividendYieldPerYear(currentYear, totalYears)...)
-		dividendYieldRow = append(dividendYieldRow, fmt.Sprintf("%.3f%%", etf.AverageDividendYield(currentYear, totalYears)))
-		table.Rich(dividendYieldRow, getColors(dividendYieldRow))
+		dividendYieldRow = append(
+			dividendYieldRow,
+			fmt.Sprintf("%.3f%%", etf.AverageDividendYield(currentYear, totalYears)),
+		)
 
-		// Add a separator row after every 3 lines
-		table.Append([]string{"-", "-", "-", "-", "-", "-", "-"})
+		if err := table.Append(applyColors(dividendYieldRow)); err != nil {
+			logger.WithError(err).Errorf("Failed to append dividend yield row for ETF: %s", etf.Name)
+		}
+
+		// Add a separator row after every 3 lines.
+		if err := table.Append([]string{"-", "-", "-", "-", "-", "-", "-"}); err != nil {
+			logger.WithError(err).Error("Failed to append separator row")
+		}
 	}
 
 	logger.Info("Rendering the results...")
-	table.Render()
+
+	if err := table.Render(); err != nil {
+		logger.WithError(err).Fatal("Failed to render the table")
+	}
 }

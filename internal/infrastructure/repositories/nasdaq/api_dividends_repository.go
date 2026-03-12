@@ -20,7 +20,12 @@ func (r *APIDividendsRepository) ListDividendsByETF(etf string) (map[string]floa
 	url := fmt.Sprintf("https://api.nasdaq.com/api/quote/%s/dividends?assetclass=etf", etf)
 
 	ctx := context.Background()
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
 	req.Header.Set(
 		"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "+
 			"(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
@@ -30,7 +35,9 @@ func (r *APIDividendsRepository) ListDividendsByETF(etf string) (map[string]floa
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch data: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	var result struct {
 		Data struct {

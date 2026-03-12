@@ -9,6 +9,7 @@ import (
 
 type ETFTestSuite struct {
 	suite.Suite
+
 	etf *entities.ETF
 }
 
