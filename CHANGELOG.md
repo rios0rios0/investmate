@@ -16,6 +16,8 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-04-04
+
 ### Changed
 
 - changed the Go module dependencies to their latest versions
@@ -50,6 +52,6 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ### Changed
 
-- corrected the structure to respect the community standards
-- changed the structure to comply DDD standards and principles
 - changed the Go version to `1.26.1` and updated all module dependencies
+- changed the structure to comply DDD standards and principles
+- corrected the structure to respect the community standards
