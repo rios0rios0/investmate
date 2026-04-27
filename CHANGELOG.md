@@ -19,6 +19,7 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 ### Changed
 
 - changed the Go module dependencies to their latest versions
+- refreshed `.github/copilot-instructions.md` to remove stale `horusec.json` references, fix constants naming convention, and correct testify description
 
 ## [0.1.6] - 2026-04-19
 
