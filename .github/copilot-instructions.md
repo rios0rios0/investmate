@@ -28,7 +28,6 @@ investmate/
 │   └── workflows/
 │       └── default.yaml     # CI/CD pipeline (delegates to shared reusable workflow)
 ├── go.mod / go.sum          # Go module definition and checksums
-├── horusec.json             # Horusec SAST configuration
 ├── CHANGELOG.md             # Keep a Changelog format with semantic versioning
 ├── CONTRIBUTING.md          # Development prerequisites and workflow
 └── README.md                # Project description and feature overview
@@ -41,7 +40,7 @@ investmate/
 | `github.com/gocolly/colly` | HTML scraping framework |
 | `github.com/olekukonko/tablewriter` | Renders ASCII tables with colour support |
 | `github.com/sirupsen/logrus` | Structured, levelled logging |
-| `github.com/stretchr/testify` | Test assertions (`assert` package) |
+| `github.com/stretchr/testify` | Test assertions (`assert`) and test suites (`suite`) |
 
 Go version: **1.26+** (declared in `go.mod`).
 
@@ -106,7 +105,7 @@ commits. SonarCloud is used for static analysis and coverage reporting.
   `t.Parallel()` at both the parent and sub-test levels.
 - Test functions are named `Test<Package>_<Function>` with descriptive sub-test names in the form
   `"should … when …"`.
-- Constants are UPPER_SNAKE_CASE (e.g. `YearsToFetch`, `PercentageMultiplier`).
+- Exported constants use PascalCase (e.g. `YearsToFetch`, `PercentageMultiplier`); unexported use camelCase (e.g. `targetYieldPercentage`).
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and the project's
   [Git Flow guide](https://github.com/rios0rios0/guide/wiki/Life-Cycle/Git-Flow).
 
@@ -145,7 +144,7 @@ etfNames := []string{
 | Add a new ETF source | Create a new package under `internal/infrastructure/repositories/`, implement `ListDividendsByETF` and/or `ListClosingPricesByETF`, then wire it in `cmd/main.go` |
 | Add a new ETF ticker | Append its symbol to `etfNames` in `cmd/main.go` |
 | Increase historical range | Change `YearsToFetch` constant in `cmd/main.go` |
-| Check SAST findings | Review `horusec.json` and run `horusec start` |
+| Check SAST findings | Run `make sast` (delegates to the shared pipelines repo) |
 
 ## Troubleshooting
 
