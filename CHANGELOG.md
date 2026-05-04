@@ -16,6 +16,10 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ## [Unreleased]
 
+### Changed
+
+- refreshed `.github/copilot-instructions.md` to add missing `internal/domain/repositories/` directory containing port interfaces to the repository structure tree
+
 ## [0.1.7] - 2026-04-28
 
 ### Changed
