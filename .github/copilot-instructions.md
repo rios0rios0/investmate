@@ -16,9 +16,10 @@ investmate/
 │   └── main_test.go         # Tests for main-package functions
 ├── internal/
 │   ├── domain/
-│   │   └── entities/
-│   │       ├── etf.go       # ETF struct and all calculation/formatting methods
-│   │       └── etf_test.go  # Unit tests for entity logic
+│   │   ├── entities/
+│   │   │   ├── etf.go       # ETF struct and all calculation/formatting methods
+│   │   │   └── etf_test.go  # Unit tests for entity logic
+│   │   └── repositories/    # Port interfaces (DividendsRepository, PricesRepository)
 │   └── infrastructure/
 │       └── repositories/
 │           ├── nasdaq/      # NASDAQ REST API adapters (dividends + closing prices)
