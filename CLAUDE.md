@@ -9,9 +9,11 @@ InvestMate is a Go CLI application that fetches ETF financial data (dividend cas
 ## Build, Test, and Lint
 
 ```bash
-# Build
-make build                # Binary to bin/investmate
-make run                  # Run directly (fetches live NASDAQ data)
+# Build / run — entry point is the package at ./cmd (cmd/main.go).
+# NOTE: the Makefile build/run/debug/install targets point at ./cmd/investmate,
+# which no longer exists, so invoke go directly:
+go build -o bin/investmate ./cmd   # Binary to bin/investmate
+go run ./cmd                        # Run directly (fetches live NASDAQ data)
 
 # Test
 go test ./...             # All tests (some call live NASDAQ APIs, requires network)
