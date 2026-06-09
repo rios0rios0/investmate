@@ -16,11 +16,12 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ## [Unreleased]
 
+## [0.1.13] - 2026-06-09
+
 ### Changed
 
 - changed the Go module dependencies to their latest versions
 - refreshed `CLAUDE.md` build/run commands to invoke `go build`/`go run` against `./cmd` (the Makefile targets still reference the removed `./cmd/investmate` path)
-- changed the Go module dependencies to their latest versions
 
 ## [0.1.12] - 2026-06-03
 
