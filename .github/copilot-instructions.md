@@ -112,11 +112,12 @@ commits. SonarCloud is used for static analysis and coverage reporting.
 
 ## Configuration
 
-The two key compile-time constants in `cmd/main.go` control behaviour:
+Two compile-time constants in `cmd/main.go` control behaviour:
 
 ```go
 const (
-    YearsToFetch = 5 // How many years of historical data to fetch and display
+    YearsToFetch          = 5 // How many years of historical data to fetch and display
+    targetYieldPercentage = 9 // Minimum dividend yield coloured green; below is coloured red
 )
 ```
 
