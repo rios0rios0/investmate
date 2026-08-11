@@ -19,6 +19,7 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 ### Changed
 
 - refreshed `.github/copilot-instructions.md` to document the `targetYieldPercentage` compile-time constant
+- changed the Go module dependencies to their latest versions
 
 ## [0.1.19] - 2026-07-27
 
