@@ -1,11 +1,11 @@
 module github.com/rios0rios0/investmate
 
-go 1.26.5
+go 1.26.6
 
 require (
 	github.com/gocolly/colly v1.2.0
 	github.com/olekukonko/tablewriter v1.1.4
-	github.com/sirupsen/logrus v1.9.4
+	github.com/sirupsen/logrus v1.10.0
 	github.com/stretchr/testify v1.11.1
 )
 
