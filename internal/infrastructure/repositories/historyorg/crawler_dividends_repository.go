@@ -24,7 +24,7 @@ func (r CrawlerDividendsRepository) ListDividendsByETF(etf string) (map[string]f
 		date := e.ChildText("td:nth-child(2)")        // Payout Date
 		dividendStr := e.ChildText("td:nth-child(3)") // Cash Amount
 
-		year := strings.Split(date, "-")[0]
+		year, _, _ := strings.Cut(date, "-")
 
 		dividendStr = strings.TrimSpace(strings.ReplaceAll(dividendStr, "$", ""))
 		dividend, err := strconv.ParseFloat(dividendStr, 64)
