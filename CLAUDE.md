@@ -76,7 +76,7 @@ Compile-time constants in `cmd/main.go`:
 ## Troubleshooting
 
 - **Empty API data**: NASDAQ blocks requests without a browser-like `User-Agent` header. The repository sets one explicitly.
-- **Build errors after `go mod tidy`**: Requires Go >= 1.26.
+- **Build errors after `go mod tidy`**: Requires Go >= 1.27.
 
 ## CI/CD
 

@@ -43,7 +43,7 @@ investmate/
 | `github.com/sirupsen/logrus` | Structured, levelled logging |
 | `github.com/stretchr/testify` | Test assertions (`assert`) and test suites (`suite`) |
 
-Go version: **1.26+** (declared in `go.mod`).
+Go version: **1.27+** (declared in `go.mod`).
 
 ## Architecture & Design Patterns
 
@@ -152,6 +152,6 @@ etfNames := []string{
 
 - **Empty data for an ETF** — the NASDAQ API blocks requests without a browser-like `User-Agent`.
   The repository sets one explicitly; verify it has not changed upstream.
-- **Build errors after `go mod tidy`** — ensure your local Go version is ≥ 1.26.
+- **Build errors after `go mod tidy`** — ensure your local Go version is ≥ 1.27.
 - **Table colours not showing** — some terminals do not support ANSI colour codes; run in a
   terminal that does (e.g. `bash`, `zsh`, Windows Terminal).
