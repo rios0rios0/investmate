@@ -22,6 +22,17 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-03
+
+### Changed
+
+- changed the Go module dependencies to their latest versions
+- changed the Go version to `1.27.1` and updated all module dependencies
+
+### Fixed
+
+- fixed the build by migrating to `colly` v2 and holding `gobwas/glob` at v0.2.3, the last version whose `Glob` interface `colly` still compiles against
+
 ## [0.3.0] - 2026-08-28
 
 ### Added
