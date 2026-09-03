@@ -1,0 +1,3 @@
+kind: 'Fixed'
+body: 'fixed the build by migrating to `colly` v2 and holding `gobwas/glob` at v0.2.3, the last version whose `Glob` interface `colly` still compiles against'
+time: '2026-09-03T02:06:00.171096241Z'
