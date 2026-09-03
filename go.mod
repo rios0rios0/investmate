@@ -45,6 +45,10 @@ require (
 // gobwas/glob v1.0.0 is a breaking major: it removed the `Glob` interface in favour of a
 // concrete `*Pattern` type. Every published colly release -- including v2.3.0, the latest --
 // still declares `compiledGlob glob.Glob`, so selecting v1.0.0 makes colly fail to compile
-// ("undefined: glob.Glob") and takes the whole module down with it. Excluded so that
-// dependency automation cannot select it again until colly migrates upstream.
-replace github.com/gobwas/glob => github.com/gobwas/glob v0.2.3
+// ("undefined: glob.Glob") and takes the whole module down with it.
+//
+// This blocks v1.0.0 and nothing else. v1 shares the unsuffixed module path with v0, so
+// `go get -u` crosses the major boundary freely and a future v1.0.1 would be selected
+// without complaint -- it would need adding here too. The durable guard is a major-version
+// filter in the tool that opens these bumps, not this line.
+exclude github.com/gobwas/glob v1.0.0
