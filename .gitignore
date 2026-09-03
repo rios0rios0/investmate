@@ -8,4 +8,5 @@ build
 /coverage.xml
 /cobertura.xml
 /junit.xml
+/merged.yml
 /reports
