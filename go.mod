@@ -47,4 +47,4 @@ require (
 // still declares `compiledGlob glob.Glob`, so selecting v1.0.0 makes colly fail to compile
 // ("undefined: glob.Glob") and takes the whole module down with it. Excluded so that
 // dependency automation cannot select it again until colly migrates upstream.
-exclude github.com/gobwas/glob v1.0.0
+replace github.com/gobwas/glob => github.com/gobwas/glob v0.2.3
