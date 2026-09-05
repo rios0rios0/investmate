@@ -1,0 +1,3 @@
+kind: 'Changed'
+body: 'changed the NASDAQ repositories to share one API client for the HTTP request setup and JSON decoding, removing the duplicated code SonarCloud flagged on the main branch'
+time: '2026-09-05T20:24:48.610276571Z'

@@ -22,7 +22,7 @@ investmate/
 │   │   └── repositories/    # Port interfaces (DividendsRepository, PricesRepository)
 │   └── infrastructure/
 │       └── repositories/
-│           ├── nasdaq/      # NASDAQ REST API adapters (dividends + closing prices)
+│           ├── nasdaq/      # NASDAQ REST API adapters (shared APIClient, dividends + closing prices)
 │           ├── statusinvest/# StatusInvest web-crawler adapter (dividends, currently unused)
 │           └── historyorg/  # History.org crawler adapter (currently unused)
 ├── .github/

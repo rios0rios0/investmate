@@ -2,7 +2,6 @@ package nasdaq
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -10,34 +9,21 @@ import (
 )
 
 type APIDividendsRepository struct {
+	client *APIClient
 }
 
 func NewAPIDividendsRepository() *APIDividendsRepository {
-	return &APIDividendsRepository{}
+	return NewAPIDividendsRepositoryWithClient(NewAPIClient(DefaultBaseURL, http.DefaultClient))
+}
+
+// NewAPIDividendsRepositoryWithClient builds the repository on top of an explicit APIClient, which is how
+// tests point it at an in-memory server.
+func NewAPIDividendsRepositoryWithClient(client *APIClient) *APIDividendsRepository {
+	return &APIDividendsRepository{client: client}
 }
 
 func (r *APIDividendsRepository) ListDividendsByETF(etf string) (map[string]float64, error) {
-	url := fmt.Sprintf("https://api.nasdaq.com/api/quote/%s/dividends?assetclass=etf", etf)
-
-	ctx := context.Background()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set(
-		"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "+
-			"(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
-	)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch data: %w", err)
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
+	endpoint := fmt.Sprintf("/api/quote/%s/dividends?assetclass=etf", etf)
 
 	var result struct {
 		Data struct {
@@ -50,8 +36,8 @@ func (r *APIDividendsRepository) ListDividendsByETF(etf string) (map[string]floa
 		} `json:"data"`
 	}
 
-	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+	if err := r.client.FetchJSON(context.Background(), endpoint, &result); err != nil {
+		return nil, err
 	}
 
 	yearlySums := make(map[string]float64)
