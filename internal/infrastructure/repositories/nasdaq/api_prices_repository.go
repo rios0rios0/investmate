@@ -2,7 +2,6 @@ package nasdaq
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -19,10 +18,17 @@ const (
 )
 
 type APIPricesRepository struct {
+	client *APIClient
 }
 
 func NewAPIPricesRepository() *APIPricesRepository {
-	return &APIPricesRepository{}
+	return NewAPIPricesRepositoryWithClient(NewAPIClient(DefaultBaseURL, http.DefaultClient))
+}
+
+// NewAPIPricesRepositoryWithClient builds the repository on top of an explicit APIClient, which is how
+// tests point it at an in-memory server. A nil client falls back to one bound to [DefaultBaseURL].
+func NewAPIPricesRepositoryWithClient(client *APIClient) *APIPricesRepository {
+	return &APIPricesRepository{client: client}
 }
 
 func (r APIPricesRepository) ListClosingPricesByETF(etf string) (map[string]float64, error) {
@@ -31,29 +37,10 @@ func (r APIPricesRepository) ListClosingPricesByETF(etf string) (map[string]floa
 	fromDate := fmt.Sprintf("%d-01-01", currentYear-YearsToFetch)
 	toDate := fmt.Sprintf("%d-12-31", currentYear)
 
-	url := fmt.Sprintf(
-		"https://api.nasdaq.com/api/quote/%s/historical?assetclass=etf&fromdate=%s&todate=%s&limit=%d&offset=0",
+	endpoint := fmt.Sprintf(
+		"/api/quote/%s/historical?assetclass=etf&fromdate=%s&todate=%s&limit=%d&offset=0",
 		etf, fromDate, toDate, YearsToFetch*NumberOfDaysInYear,
 	)
-	ctx := context.Background()
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set(
-		"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "+
-			"(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
-	)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch data: %w", err)
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
 
 	var result struct {
 		Data struct {
@@ -66,8 +53,8 @@ func (r APIPricesRepository) ListClosingPricesByETF(etf string) (map[string]floa
 		} `json:"data"`
 	}
 
-	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+	if err := clientOrDefault(r.client).FetchJSON(context.Background(), endpoint, &result); err != nil {
+		return nil, err
 	}
 
 	yearlySums := make(map[string]float64)

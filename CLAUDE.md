@@ -45,7 +45,7 @@ Clean Architecture with Hexagonal (Ports & Adapters) pattern:
 
 ### Adapters
 
-- **`nasdaq/`** — Active. REST API adapters for dividends and closing prices.
+- **`nasdaq/`** — Active. REST API adapters for dividends and closing prices. Both sit on the shared `APIClient` (`api_client.go`), which owns the request setup (context, browser-like `User-Agent`, JSON decoding); the `...WithClient` constructors let tests point a repository at an `httptest` server.
 - **`statusinvest/`** and **`historyorg/`** — Currently unused web-crawler adapters.
 
 ### Key Dependencies
