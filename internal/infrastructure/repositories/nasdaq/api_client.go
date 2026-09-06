@@ -39,6 +39,17 @@ func NewAPIClient(baseURL string, httpClient *http.Client) *APIClient {
 	return client
 }
 
+// clientOrDefault returns client unchanged, or a client bound to [DefaultBaseURL] when it is nil, so a
+// repository built without one (a zero value, or a "WithClient" constructor given nil) still reaches
+// the public API instead of dereferencing a nil pointer.
+func clientOrDefault(client *APIClient) *APIClient {
+	if client == nil {
+		return NewAPIClient(DefaultBaseURL, http.DefaultClient)
+	}
+
+	return client
+}
+
 // FetchJSON performs a GET request against the API endpoint (path plus query string) and decodes the
 // JSON response body into out.
 func (c *APIClient) FetchJSON(ctx context.Context, endpoint string, out any) error {

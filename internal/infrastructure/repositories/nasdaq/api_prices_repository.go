@@ -26,7 +26,7 @@ func NewAPIPricesRepository() *APIPricesRepository {
 }
 
 // NewAPIPricesRepositoryWithClient builds the repository on top of an explicit APIClient, which is how
-// tests point it at an in-memory server.
+// tests point it at an in-memory server. A nil client falls back to one bound to [DefaultBaseURL].
 func NewAPIPricesRepositoryWithClient(client *APIClient) *APIPricesRepository {
 	return &APIPricesRepository{client: client}
 }
@@ -53,7 +53,7 @@ func (r APIPricesRepository) ListClosingPricesByETF(etf string) (map[string]floa
 		} `json:"data"`
 	}
 
-	if err := r.client.FetchJSON(context.Background(), endpoint, &result); err != nil {
+	if err := clientOrDefault(r.client).FetchJSON(context.Background(), endpoint, &result); err != nil {
 		return nil, err
 	}
 
