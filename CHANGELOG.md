@@ -22,6 +22,13 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-09-07
+
+### Changed
+
+- changed the Go module dependencies to their latest versions
+- changed the NASDAQ repositories to share one API client for the HTTP request setup and JSON decoding, removing the duplicated code SonarCloud flagged on the main branch
+
 ## [0.3.1] - 2026-09-03
 
 ### Changed
