@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/gocolly/colly/v2 v2.3.0
-	github.com/olekukonko/tablewriter v1.1.4
+	github.com/olekukonko/tablewriter v1.1.5
 	github.com/sirupsen/logrus v1.10.2
 	github.com/stretchr/testify v1.12.1
 )
