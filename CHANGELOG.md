@@ -22,6 +22,15 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ## [Unreleased]
 
+## [0.3.9] - 2026-10-14
+
+### Changed
+
+- changed the Go module `golang.org/x/net` from `v0.59.0` to `v0.61.0`
+- changed the Go modules `github.com/mattn/go-colorable` from `v0.1.15` to `v0.1.16`, `github.com/mattn/go-runewidth` from `v0.0.30` to `v0.0.31` and `github.com/olekukonko/ll` from `v0.1.8` to `v0.1.9`
+- changed the Go modules `golang.org/x/sys` from `v0.48.0` to `v0.49.0` and `golang.org/x/text` from `v0.42.0` to `v0.43.0`
+- changed the Go version from `1.27.1` to `1.27.2`
+
 ## [0.3.8] - 2026-10-07
 
 ### Changed
