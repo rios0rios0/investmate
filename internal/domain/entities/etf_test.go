@@ -118,5 +118,7 @@ func (suite *ETFTestSuite) TestAverageDividendYield() {
 }
 
 func TestETFTestSuite(t *testing.T) {
+	t.Parallel()
+
 	suite.Run(t, new(ETFTestSuite))
 }
