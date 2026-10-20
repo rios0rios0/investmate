@@ -1,0 +1,3 @@
+kind: 'Changed'
+body: 'changed the ETF entity test suite to run in parallel, which the `paralleltest` linter newly enabled by the shared golangci-lint configuration requires'
+time: '2026-10-20T17:36:52.710343484Z'
