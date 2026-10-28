@@ -15,7 +15,7 @@ require (
 	github.com/antchfx/htmlquery v1.3.7 // indirect
 	github.com/antchfx/xmlquery v1.5.2 // indirect
 	github.com/antchfx/xpath v1.3.9 // indirect
-	github.com/bits-and-blooms/bitset v1.26.0 // indirect
+	github.com/bits-and-blooms/bitset v1.27.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
@@ -35,7 +35,7 @@ require (
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/net v0.61.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
