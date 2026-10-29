@@ -7,7 +7,7 @@ development practices, refer to the **[Development Guide](https://github.com/rio
 
 ## Prerequisites
 
-- [Go](https://go.dev/dl/) 1.26+
+- [Go](https://go.dev/dl/) 1.27+
 - [Git](https://git-scm.com/) 2.0+
 
 ## Development Workflow
@@ -35,5 +35,5 @@ development practices, refer to the **[Development Guide](https://github.com/rio
    go test -coverprofile=coverage.out ./...
    go tool cover -func coverage.out
    ```
-8. Commit following the [commit conventions](https://github.com/rios0rios0/guide/wiki/Life-Cycle/Git-Flow)
+8. Commit following the [commit conventions](https://github.com/rios0rios0/guide/wiki/Git-Flow)
 9. Open a pull request against `main`
