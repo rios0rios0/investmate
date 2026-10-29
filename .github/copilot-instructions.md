@@ -80,8 +80,8 @@ go tool cover -func coverage.out
 golangci-lint run ./...
 ```
 
-> **Timings:** `go test ./...` completes in under 30 seconds on a standard machine when network
-> access is available (some tests call live APIs). `go build` completes in under 10 seconds.
+> **Timings:** `go test ./...` runs offline (adapter tests use `httptest` servers) and completes in
+> under 30 seconds on a standard machine. `go build` completes in under 10 seconds.
 
 ## CI/CD Pipeline
 
@@ -108,7 +108,7 @@ commits. SonarCloud is used for static analysis and coverage reporting.
   `"should … when …"`.
 - Exported constants use PascalCase (e.g. `YearsToFetch`, `PercentageMultiplier`); unexported use camelCase (e.g. `targetYieldPercentage`).
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and the project's
-  [Git Flow guide](https://github.com/rios0rios0/guide/wiki/Life-Cycle/Git-Flow).
+  [Git Flow guide](https://github.com/rios0rios0/guide/wiki/Git-Flow).
 
 ## Configuration
 
@@ -116,10 +116,13 @@ Two compile-time constants in `cmd/main.go` control behaviour:
 
 ```go
 const (
-    YearsToFetch          = 5 // How many years of historical data to fetch and display
+    YearsToFetch          = 5 // How many years of historical data to display (table columns)
     targetYieldPercentage = 9 // Minimum dividend yield coloured green; below is coloured red
 )
 ```
+
+The NASDAQ price fetch window is a separate constant, `YearsToFetch` in
+`internal/infrastructure/repositories/nasdaq/api_prices_repository.go`; keep the two in step.
 
 The list of ETFs to process is defined as a slice in `main()`:
 
@@ -145,7 +148,7 @@ etfNames := []string{
 |---|---|
 | Add a new ETF source | Create a new package under `internal/infrastructure/repositories/`, implement `ListDividendsByETF` and/or `ListClosingPricesByETF`, then wire it in `cmd/main.go` |
 | Add a new ETF ticker | Append its symbol to `etfNames` in `cmd/main.go` |
-| Increase historical range | Change `YearsToFetch` constant in `cmd/main.go` |
+| Increase historical range | Change `YearsToFetch` in both `cmd/main.go` (table columns) and `internal/infrastructure/repositories/nasdaq/api_prices_repository.go` (price fetch window) |
 | Check SAST findings | Run `make sast` (delegates to the shared pipelines repo) |
 
 ## Troubleshooting

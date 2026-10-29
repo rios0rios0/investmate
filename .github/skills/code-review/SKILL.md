@@ -20,7 +20,7 @@ The canonical engineering standards live in the
 repo-tailored index into that guide plus the rules that only apply here. Precedence, highest
 first:
 
-1. This repository's `.github/copilot-instructions.md`, `CLAUDE.md`, and `CONTRIBUTING.md` —
+1. This repository's `.github/copilot-instructions.md`, `AGENTS.md`, and `CONTRIBUTING.md` —
    they describe *this* codebase and its load-bearing invariants.
 2. The **rios0rios0/guide** wiki — the shared standard.
 3. General language idiom.
@@ -86,7 +86,7 @@ internal/infrastructure/repositories/
 - **Every calculation lives on the `ETF` entity.** A yield, average, or formatting rule computed in `cmd/main.go` or inside an adapter is a layering violation and hides itself from the entity's tests.
 - **A new data source is a new package under `internal/infrastructure/repositories/`** implementing the existing port. It must not require a change to the domain.
 - **Percentages and money need explicit precision.** Named constants such as `YearsToFetch` and `PercentageMultiplier` exist so the arithmetic is readable — a new bare literal in a formula is a finding.
-- **Live-API tests are a liability.** Some tests reach the network; a new one that does should either be gated or replaced with a fixture, and it must never depend on today's market data to pass.
+- **Tests stay off the live network.** Adapter tests run against `httptest` servers through the `...WithClient` constructors; a new test that reaches a real endpoint should be gated or rewritten that way, and none may depend on today's market data to pass.
 - Errors are wrapped with `fmt.Errorf("…: %w", err)`; logging uses Logrus with structured fields (`logger.WithError(err).Errorf(...)`).
 - Package names stay lowercase single words (`nasdaq`, `entities`); exported constants are PascalCase, unexported camelCase.
 
@@ -217,8 +217,9 @@ hand.
 - Fragment bodies start with a lowercase verb in simple past tense, capitalise proper nouns
   (GitHub, Go, Docker), and wrap code identifiers and versions in backticks.
 - `README.md` is updated whenever usage, setup, configuration, or architecture changes;
-  `.github/copilot-instructions.md` and `CLAUDE.md` whenever the workflow, commands, or
-  structure changes. Documentation and code ship in one commit.
+  `.github/copilot-instructions.md` and `AGENTS.md` whenever the workflow, commands, or
+  structure changes (`CLAUDE.md` stays the single line `@AGENTS.md`). Documentation and code
+  ship in one commit.
 
 ## Git Flow and pull-request hygiene
 
@@ -280,7 +281,7 @@ A review that raises noise gets ignored. Do not report these:
 ### Change-control checklist
 - [ ] Changelog entry present for every behavioural change
 - [ ] `README.md` updated if usage, setup, or architecture changed
-- [ ] `.github/copilot-instructions.md` and `CLAUDE.md` updated if the workflow, commands, or structure changed
+- [ ] `.github/copilot-instructions.md` and `AGENTS.md` updated if the workflow, commands, or structure changed
 - [ ] Commit messages follow `type(SCOPE): message` in simple past tense
 - [ ] Breaking changes flagged in the commit footer, the changelog, and the PR description
 

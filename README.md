@@ -41,7 +41,7 @@ A Go application that scrapes and processes ETF (Exchange-Traded Fund) data, inc
 Run the application:
 
 ```sh
-go run main.go
+go run ./cmd
 ```
 
 The application will scrape data for the specified ETFs and display it in a formatted table in the console.
@@ -49,7 +49,7 @@ The application will scrape data for the specified ETFs and display it in a form
 ## Configuration
 
 - **Years to Fetch:**
-  You can configure the number of years to fetch data for by changing the `YearsToFetch` constant in the code:
+  You can configure the number of years to fetch data for by changing the `YearsToFetch` constant in `cmd/main.go` (the table columns) and the one in `internal/infrastructure/repositories/nasdaq/api_prices_repository.go` (the price fetch window); keep both in step:
   ```go
   const (
       YearsToFetch = 5 // Number of years to fetch data for
@@ -83,9 +83,9 @@ The application will scrape data for the specified ETFs and display it in a form
     - `ShowDividendYieldPerYear`: Calculates and formats dividend yields
     - `AverageDividendYield`: Calculates average dividend yield
     - `processETF`: Populates ETF data
-    - `crawlingDividendsPerYear`: Scrapes dividend data
-    - `fetchAverageClosingPricesPerYear`: Fetches average closing prices
-    - `getColors`: Returns colors for the dividend yield row
+    - `ListDividendsByETF`: Fetches yearly dividend sums (NASDAQ dividends repository)
+    - `ListClosingPricesByETF`: Fetches yearly average closing prices (NASDAQ prices repository)
+    - `applyColors`: Colors the dividend yield cells against the target yield
 
 ## Dependencies
 
