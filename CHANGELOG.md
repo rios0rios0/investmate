@@ -22,6 +22,15 @@ Exceptions are acceptable depending on the circumstances (critical bug fixes tha
 
 ## [Unreleased]
 
+## [0.3.11] - 2026-11-04
+
+### Changed
+
+- changed the Go module `github.com/goccy/go-json` from `v0.11.2` to `v0.12.0`
+- changed the Go modules `github.com/bits-and-blooms/bitset` from `v1.26.0` to `v1.27.0` and `golang.org/x/net` from `v0.61.0` to `v0.62.0`
+- moved the agent instructions from `CLAUDE.md` to `AGENTS.md`, keeping a `CLAUDE.md` that imports it
+- refreshed `AGENTS.md`, `.github/copilot-instructions.md`, the code-review skill, `README.md`, and `CONTRIBUTING.md` to note that tests run offline, document the separate NASDAQ `YearsToFetch` constant, point at `AGENTS.md` instead of `CLAUDE.md`, and fix the run command, Go version, and Git Flow link
+
 ## [0.3.10] - 2026-10-21
 
 ### Changed
