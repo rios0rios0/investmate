@@ -1,6 +1,6 @@
 module github.com/rios0rios0/investmate
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/gocolly/colly/v2 v2.3.0
